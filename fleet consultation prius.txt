@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Transition Driver Consultation</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+        const { Users, Car, Battery, Zap, AlertTriangle, CheckCircle, BarChart3, MessageSquare, Download, UserCheck, Package, MapPin, Clock, HelpCircle } = lucide;
+
+        const DriverFeedbackTool = () => {
+          const [activeTab, setActiveTab] = useState('overview');
+          const [responses, setResponses] = useState({
+            comfort: {},
+            concerns: {},
+            priorities: {},
+            scenarios: {},
+            vehicleRequirements: {},
+            openFeedback: []
+          });
+
+          const [currentPoll, setCurrentPoll] = useState(null);
+          const [pollResults, setPollResults] = useState({});
+
+          const addConcern = (category, concern) => {
+            const newConcerns = { ...responses.concerns };
+            if (!newConcerns[category]) newConcerns[category] = [];
+            newConcerns[category].push({
+              id: Date.now(),
+              text: concern,
+              timestamp: new Date().toLocaleTimeString()
+            });
+            setResponses({ ...responses, concerns: newConcerns });
+          };
+
+          const addOpenFeedback = (feedback) => {
+            const newFeedback = [...responses.openFeedback, {
+              id: Date.now(),
+              text: feedback,
+              timestamp: new Date().toLocaleTimeString()
+            }];
+            setResponses({ ...responses, openFeedback: newFeedback });
+          };
+
+          const updateVehicleRequirement = (question, answer) => {
+            const newRequirements = { ...responses.vehicleRequirements };
+            newRequirements[question] = {
+              answer,
+              timestamp: new Date().toLocaleTimeString()
+            };
+            setResponses({ ...responses, vehicleRequirements: newRequirements });
+          };
+
+          const TabButton = ({ id, label, icon: Icon, active }) => (
+            <button
+              onClick={() => setActiveTab(id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                active 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <Icon size={20} />
+              {label}
+            </button>
+          );
+
+          const OverviewTab = () => (
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-xl">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">2024 Prius Usage Summary</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="text-3xl font-bold text-blue-600">116+</div>
+                    <div className="text-sm text-gray-600">Total Trips</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="text-3xl font-bold text-green-600">124km</div>
+                    <div className="text-sm text-gray-600">Average Trip</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="text-3xl font-bold text-orange-600">4-1,198km</div>
+                    <div className="text-sm text-gray-600">Trip Range</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="text-3xl font-bold text-purple-600">8+</div>
+                    <div className="text-sm text-gray-600">Departments</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Car className="text-blue-600" size={24} />
+                    Common Destinations
+                  </h3>
+                  <ul className="space-y-2">
+                    <li className="flex justify-between">
+                      <span>Castle Hill</span>
+                      <span className="text-blue-600 font-medium">~80km</span>
+                    </li>
+                    <li className="flex justify-between">
+                      <span>Rydalmere</span>
+                      <span className="text-blue-600 font-medium">45-49km</span>
+                    </li>
+                    <li className="flex justify-between">
+                      <span>Fleet Service</span>
+                      <span className="text-blue-600 font-medium">13-14km</span>
+                    </li>
+                    <li className="flex justify-between">
+                      <span>Inspections/AV</span>
+                      <span className="text-blue-600 font-medium">76km</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Battery className="text-green-600" size={24} />
+                    EV Suitability Analysis
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Trips under 100km</span>
+                      <div className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-medium">~80%</div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Trips under 200km</span>
+                      <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">~90%</div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Long trips (200km+)</span>
+                      <div className="bg-orange-100 text-orange-800 px-2 py-1 rounded text-sm font-medium">~10%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+
+          const PollingTab = () => {
+            const surveyQuestions = [
+              {
+                id: 'range_comfort',
+                question: 'How comfortable are you with the impacts of a reduced driving range for longer trips over 200km?',
+                options: ['Very comfortable', 'Somewhat comfortable', 'Neutral', 'Somewhat concerned', 'Very concerned'],
+                icon: Battery,
+                category: 'Range Considerations'
+              },
+              {
+                id: 'charging_concern',
+                question: 'Rate your concern about charging time (1-5 scale)',
+                options: ['1 - No concern', '2 - Slight concern', '3 - Moderate concern', '4 - High concern', '5 - Major concern'],
+                icon: Zap,
+                category: 'Charging Concerns'
+              },
+              {
+                id: 'priority_choice',
+                question: 'Which is most important for your work vehicle?',
+                options: ['Lower emissions', 'Unlimited range', 'Lower operating costs', 'Reliability', 'Familiar technology'],
+                icon: CheckCircle,
+                category: 'Vehicle Priorities'
+              },
+              {
+                id: 'ev_experience',
+                question: 'Your experience with electric vehicles?',
+                options: ['Regular user', 'Occasional user', 'Test driven only', 'No experience', 'Prefer not to say'],
+                icon: Car,
+                category: 'EV Experience'
+              }
+            ];
+
+            const updateSurveyResponse = (questionId, answer) => {
+              const newResults = { ...pollResults };
+              if (!newResults[questionId]) {
+                newResults[questionId] = {};
+              }
+              
+              newResults[questionId] = { [answer]: 1 };
+              setPollResults(newResults);
+            };
+
+            return (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">EV Survey</h2>
+                  <p className="text-gray-600">Share your thoughts and experience with electric vehicle transition</p>
+                </div>
+
+                <div className="grid gap-6">
+                  {surveyQuestions.map((question) => {
+                    const Icon = question.icon;
+                    const currentResponse = pollResults[question.id];
+                    const selectedAnswer = currentResponse ? Object.keys(currentResponse)[0] : null;
+                    
+                    return (
+                      <div key={question.id} className="bg-white p-6 rounded-xl shadow-sm border">
+                        <div className="flex items-start gap-3 mb-4">
+                          <Icon size={24} className="text-green-600 mt-1" />
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-green-600 mb-1">{question.category}</div>
+                            <h3 className="text-lg font-semibold text-gray-800">{question.question}</h3>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          {question.options.map((option, index) => (
+                            <button
+                              key={index}
+                              onClick={() => updateSurveyResponse(question.id, option)}
+                              className={`w-full p-3 text-left rounded-lg border-2 transition-colors ${
+                                selectedAnswer === option
+                                  ? 'border-green-500 bg-green-50 text-green-800'
+                                  : 'border-gray-200 hover:border-green-300 hover:bg-green-50'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span>{option}</span>
+                                {selectedAnswer === option && (
+                                  <CheckCircle size={20} className="text-green-600" />
+                                )}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                        
+                        {selectedAnswer && (
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <p className="text-sm text-gray-500">
+                              Selected: <span className="font-medium text-green-600">{selectedAnswer}</span>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Users size={24} className="text-blue-600" />
+                    Survey Summary
+                    <span className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full ml-2">
+                      {Object.keys(pollResults).length}/{surveyQuestions.length}
+                    </span>
+                  </h3>
+                  <div className="space-y-2">
+                    {Object.entries(pollResults).map(([questionId, response]) => {
+                      const question = surveyQuestions.find(q => q.id === questionId);
+                      const answer = Object.keys(response)[0];
+                      return (
+                        <div key={questionId} className="bg-blue-50 p-3 rounded-lg">
+                          <div className="text-sm font-medium text-blue-800">{question?.category}</div>
+                          <div className="text-sm text-gray-700">{answer}</div>
+                        </div>
+                      );
+                    })}
+                    {Object.keys(pollResults).length === 0 && (
+                      <p className="text-gray-500 text-sm italic">No survey responses yet</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          };
+
+          const VehicleRequirementsTab = () => {
+            const requirements = [
+              {
+                id: 'passengers',
+                question: 'What is the largest number of passengers you have travelled with?',
+                type: 'select',
+                options: ['1 (driver only)', '2 passengers', '3 passengers', '4 passengers', '5+ passengers'],
+                icon: UserCheck,
+                category: 'Passenger Capacity'
+              },
+              {
+                id: 'storage',
+                question: 'How much storage space do you typically need?',
+                type: 'select',
+                options: ['Personal items only', 'Small equipment/documents', 'Medium equipment/boxes', 'Large equipment/furniture'],
+                icon: Package,
+                category: 'Storage Requirements'
+              },
+              {
+                id: 'multiday',
+                question: 'How often do you need to travel for multiple days?',
+                type: 'select',
+                options: ['Never', 'Rarely (1-2 times/year)', 'Occasionally (3-6 times/year)'],
+                icon: MapPin,
+                category: 'Multi-day Travel'
+              },
+              {
+                id: 'urgent_trips',
+                question: 'How often do you need the vehicle for urgent/emergency trips?',
+                type: 'select',
+                options: ['Never', 'Rarely', 'Occasionally', 'Regularly', 'This is a primary use'],
+                icon: AlertTriangle,
+                category: 'Emergency Use'
+              },
+              {
+                id: 'driving_conditions',
+                question: 'What driving conditions do you typically encounter?',
+                type: 'select',
+                options: ['City driving only', 'Highway/freeway', 'Rural roads', 'Unsealed roads'],
+                icon: Car,
+                category: 'Driving Conditions'
+              },
+              {
+                id: 'time_flexibility',
+                question: 'How flexible is your travel timing?',
+                type: 'select',
+                options: ['Must travel immediately when needed', 'Some flexibility (30-60 minutes)', 'Moderate flexibility (1-2 hours)', 'High flexibility (can plan ahead)', 'Very flexible (can reschedule if needed)'],
+                icon: Clock,
+                category: 'Time Flexibility'
+              },
+              {
+                id: 'destinations',
+                question: 'What types of destinations do you typically visit?',
+                type: 'select',
+                options: ['Office buildings only', 'Mix of office/public buildings', 'Outdoor locations', 'Remote locations', 'Construction/industrial sites'],
+                icon: MapPin,
+                category: 'Destination Types'
+              }
+            ];
+
+            return (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Vehicle Requirements Assessment</h2>
+                  <p className="text-gray-600">Help us understand how you use the vehicle to choose the right replacement</p>
+                </div>
+
+                <div className="grid gap-6">
+                  {requirements.map((req) => {
+                    const Icon = req.icon;
+                    const currentResponse = responses.vehicleRequirements[req.id];
+                    
+                    return (
+                      <div key={req.id} className="bg-white p-6 rounded-xl shadow-sm border">
+                        <div className="flex items-start gap-3 mb-4">
+                          <Icon size={24} className="text-blue-600 mt-1" />
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-blue-600 mb-1">{req.category}</div>
+                            <h3 className="text-lg font-semibold text-gray-800">{req.question}</h3>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          {req.options.map((option, index) => (
+                            <button
+                              key={index}
+                              onClick={() => updateVehicleRequirement(req.id, option)}
+                              className={`w-full p-3 text-left rounded-lg border-2 transition-colors ${
+                                currentResponse?.answer === option
+                                  ? 'border-blue-500 bg-blue-50 text-blue-800'
+                                  : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span>{option}</span>
+                                {currentResponse?.answer === option && (
+                                  <CheckCircle size={20} className="text-blue-600" />
+                                )}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                        
+                        {currentResponse && (
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <p className="text-sm text-gray-500">
+                              Selected: <span className="font-medium text-blue-600">{currentResponse.answer}</span>
+                              <span className="ml-2">({currentResponse.timestamp})</span>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Car size={24} className="text-green-600" />
+                    Requirements Summary
+                    <span className="bg-green-100 text-green-800 text-sm px-2 py-1 rounded-full ml-2">
+                      {Object.keys(responses.vehicleRequirements).length}/{requirements.length}
+                    </span>
+                  </h3>
+                  <div className="space-y-2">
+                    {Object.entries(responses.vehicleRequirements).map(([questionId, response]) => {
+                      const question = requirements.find(r => r.id === questionId);
+                      return (
+                        <div key={questionId} className="bg-green-50 p-3 rounded-lg">
+                          <div className="text-sm font-medium text-green-800">{question?.category}</div>
+                          <div className="text-sm text-gray-700">{response.answer}</div>
+                        </div>
+                      );
+                    })}
+                    {Object.keys(responses.vehicleRequirements).length === 0 && (
+                      <p className="text-gray-500 text-sm italic">No requirements selected yet</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          };
+
+          const ConcernsTab = () => {
+            const [newConcern, setNewConcern] = useState('');
+            const [selectedCategory, setSelectedCategory] = useState('range');
+            
+            const categories = [
+              { id: 'range', label: 'Range Anxiety', icon: Battery },
+              { id: 'charging', label: 'Charging Infrastructure', icon: Zap },
+              { id: 'reliability', label: 'Reliability Concerns', icon: AlertTriangle },
+              { id: 'operational', label: 'Operational Impact', icon: Car },
+              { id: 'other', label: 'Other Concerns', icon: HelpCircle }
+            ];
+
+            const handleAddConcern = () => {
+              if (newConcern.trim()) {
+                addConcern(selectedCategory, newConcern.trim());
+                setNewConcern('');
+              }
+            };
+
+            return (
+              <div className="space-y-6">
+                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                  <h3 className="text-lg font-semibold mb-4">Add New Concern</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Category:</label>
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-lg"
+                      >
+                        {categories.map(cat => (
+                          <option key={cat.id} value={cat.id}>{cat.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Concern:</label>
+                      <textarea
+                        value={newConcern}
+                        onChange={(e) => setNewConcern(e.target.value)}
+                        placeholder="Describe your specific concern..."
+                        className="w-full p-3 border border-gray-300 rounded-lg h-24 resize-none"
+                      />
+                    </div>
+                    <button
+                      onClick={handleAddConcern}
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Add Concern
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid gap-6">
+                  {categories.map(category => {
+                    const Icon = category.icon;
+                    const concernsInCategory = responses.concerns[category.id] || [];
+                    
+                    return (
+                      <div key={category.id} className="bg-white p-6 rounded-xl shadow-sm border">
+                        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                          <Icon size={24} className="text-red-600" />
+                          {category.label}
+                          <span className="bg-red-100 text-red-800 text-sm px-2 py-1 rounded-full ml-2">
+                            {concernsInCategory.length}
+                          </span>
+                        </h3>
+                        <div className="space-y-2">
+                          {concernsInCategory.map(concern => (
+                            <div key={concern.id} className="bg-red-50 p-3 rounded-lg border-l-4 border-red-400">
+                              <p className="text-sm">{concern.text}</p>
+                              <p className="text-xs text-gray-500 mt-1">{concern.timestamp}</p>
+                            </div>
+                          ))}
+                          {concernsInCategory.length === 0 && (
+                            <p className="text-gray-500 text-sm italic">No concerns raised yet</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          };
+
+          const FeedbackTab = () => {
+            const [newFeedback, setNewFeedback] = useState('');
+
+            const handleAddFeedback = () => {
+              if (newFeedback.trim()) {
+                addOpenFeedback(newFeedback.trim());
+                setNewFeedback('');
+              }
+            };
+
+            return (
+              <div className="space-y-6">
+                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                  <h3 className="text-lg font-semibold mb-4">Share Additional Feedback</h3>
+                  <div className="space-y-4">
+                    <textarea
+                      value={newFeedback}
+                      onChange={(e) => setNewFeedback(e.target.value)}
+                      placeholder="Share any additional thoughts, suggestions, or concerns about the fleet transition..."
+                      className="w-full p-3 border border-gray-300 rounded-lg h-32 resize-none"
+                    />
+                    <button
+                      onClick={handleAddFeedback}
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Add Feedback
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <MessageSquare size={24} className="text-green-600" />
+                    All Feedback
+                    <span className="bg-green-100 text-green-800 text-sm px-2 py-1 rounded-full ml-2">
+                      {responses.openFeedback.length}
+                    </span>
+                  </h3>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {responses.openFeedback.map(feedback => (
+                      <div key={feedback.id} className="bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
+                        <p className="text-sm">{feedback.text}</p>
+                        <p className="text-xs text-gray-500 mt-2">{feedback.timestamp}</p>
+                      </div>
+                    ))}
+                    {responses.openFeedback.length === 0 && (
+                      <p className="text-gray-500 text-sm italic">No feedback submitted yet</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          };
+
+          const SummaryTab = () => {
+            const totalConcerns = Object.values(responses.concerns).reduce((total, arr) => total + arr.length, 0);
+            const totalPolls = Object.keys(pollResults).length;
+            const totalResponses = Object.values(pollResults).reduce((total, poll) => 
+              total + Object.values(poll).reduce((sum, count) => sum + count, 0), 0
+            );
+            const totalRequirements = Object.keys(responses.vehicleRequirements).length;
+
+            const downloadData = () => {
+              const data = {
+                timestamp: new Date().toISOString(),
+                summary: {
+                  totalConcerns,
+                  totalFeedback: responses.openFeedback.length,
+                  totalPollResponses: totalResponses,
+                  completedPolls: totalPolls,
+                  completedRequirements: totalRequirements
+                },
+                pollResults,
+                concerns: responses.concerns,
+                vehicleRequirements: responses.vehicleRequirements,
+                feedback: responses.openFeedback
+              };
+              
+              const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `fleet-consultation-data-${new Date().toISOString().split('T')[0]}.json`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            };
+
+            return (
+              <div className="space-y-6">
+                <div className="bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-xl">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-4">Session Summary</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <div className="text-2xl font-bold text-blue-600">{totalPolls}</div>
+                      <div className="text-sm text-gray-600">EV Surveys</div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <div className="text-2xl font-bold text-purple-600">{totalRequirements}</div>
+                      <div className="text-sm text-gray-600">Requirements</div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <div className="text-2xl font-bold text-red-600">{totalConcerns}</div>
+                      <div className="text-sm text-gray-600">Concerns</div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <div className="text-2xl font-bold text-green-600">{responses.openFeedback.length}</div>
+                      <div className="text-sm text-gray-600">Feedback</div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <div className="text-2xl font-bold text-orange-600">{totalResponses}</div>
+                      <div className="text-sm text-gray-600">Total Responses</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-center">
+                  <button
+                    onClick={downloadData}
+                    className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  >
+                    <Download size={24} />
+                    Download Session Data
+                  </button>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                  <h3 className="text-lg font-semibold mb-6">Response Data Overview</h3>
+                  
+                  {Object.keys(pollResults).length > 0 && (
+                    <div className="mb-8">
+                      <h4 className="text-md font-medium mb-4 flex items-center gap-2">
+                        <Users className="text-green-600" size={20} />
+                        EV Survey Responses
+                      </h4>
+                      <div className="space-y-4">
+                        {Object.entries(pollResults).map(([questionId, responses]) => {
+                          const question = [
+                            { id: 'range_comfort', label: 'Range Comfort (200km+ trips)' },
+                            { id: 'charging_concern', label: 'Charging Time Concern' },
+                            { id: 'priority_choice', label: 'Vehicle Priority' },
+                            { id: 'ev_experience', label: 'EV Experience Level' }
+                          ].find(q => q.id === questionId);
+                          
+                          return (
+                            <div key={questionId} className="bg-green-50 p-4 rounded-lg">
+                              <div className="text-sm font-medium text-green-800 mb-2">{question?.label}</div>
+                              <div className="space-y-1">
+                                {Object.entries(responses).map(([answer, count]) => (
+                                  <div key={answer} className="flex items-center justify-between">
+                                    <span className="text-sm text-gray-700">{answer}</span>
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2">
+                                        <div 
+                                          className="bg-green-600 h-2 rounded-full" 
+                                          style={{ width: `${Math.min(100, (count / Math.max(...Object.values(responses))) * 100)}%` }}
+                                        />
+                                      </div>
+                                      <span className="text-sm font-medium text-green-600 w-6">{count}</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {Object.keys(responses.vehicleRequirements).length > 0 && (
+                    <div className="mb-8">
+                      <h4 className="text-md font-medium mb-4 flex items-center gap-2">
+                        <Car className="text-blue-600" size={20} />
+                        Vehicle Requirements Summary
+                      </h4>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {Object.entries(responses.vehicleRequirements).map(([questionId, response]) => {
+                          const questionLabels = {
+                            'passengers': 'Passenger Capacity',
+                            'storage': 'Storage Needs',
+                            'multiday': 'Multi-day Travel',
+                            'urgent_trips': 'Emergency Use',
+                            'driving_conditions': 'Driving Conditions',
+                            'time_flexibility': 'Time Flexibility',
+                            'destinations': 'Destination Types'
+                          };
+                          
+                          return (
+                            <div key={questionId} className="bg-blue-50 p-3 rounded-lg">
+                              <div className="text-sm font-medium text-blue-800">{questionLabels[questionId]}</div>
+                              <div className="text-sm text-gray-700 mt-1">{response.answer}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {Object.keys(responses.concerns).length > 0 && (
+                    <div className="mb-8">
+                      <h4 className="text-md font-medium mb-4 flex items-center gap-2">
+                        <AlertTriangle className="text-red-600" size={20} />
+                        Concerns by Category
+                      </h4>
+                      <div className="space-y-3">
+                        {Object.entries(responses.concerns).map(([category, concernsList]) => {
+                          const categoryLabels = {
+                            'range': 'Range Anxiety',
+                            'charging': 'Charging Infrastructure',
+                            'reliability': 'Reliability Concerns',
+                            'operational': 'Operational Impact',
+                            'other': 'Other Concerns'
+                          };
+                          
+                          return (
+                            <div key={category} className="bg-red-50 p-4 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium text-red-800">{categoryLabels[category]}</span>
+                                <span className="bg-red-200 text-red-800 px-2 py-1 rounded-full text-xs">
+                                  {concernsList.length} concern{concernsList.length !== 1 ? 's' : ''}
+                                </span>
+                              </div>
+                              <div className="space-y-1">
+                                {concernsList.slice(0, 3).map((concern, index) => (
+                                  <div key={concern.id} className="text-xs text-gray-600 bg-white p-2 rounded">
+                                    {concern.text.length > 80 ? `${concern.text.substring(0, 80)}...` : concern.text}
+                                  </div>
+                                ))}
+                                {concernsList.length > 3 && (
+                                  <div className="text-xs text-gray-500 italic">
+                                    ...and {concernsList.length - 3} more concern{concernsList.length - 3 !== 1 ? 's' : ''}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {responses.openFeedback.length > 0 && (
+                    <div>
+                      <h4 className="text-md font-medium mb-4 flex items-center gap-2">
+                        <MessageSquare className="text-purple-600" size={20} />
+                        Recent Feedback
+                      </h4>
+                      <div className="space-y-2">
+                        {responses.openFeedback.slice(-3).map(feedback => (
+                          <div key={feedback.id} className="bg-purple-50 p-3 rounded-lg">
+                            <div className="text-sm text-gray-700">
+                              {feedback.text.length > 120 ? `${feedback.text.substring(0, 120)}...` : feedback.text}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">{feedback.timestamp}</div>
+                          </div>
+                        ))}
+                        {responses.openFeedback.length > 3 && (
+                          <div className="text-sm text-gray-500 italic text-center">
+                            ...and {responses.openFeedback.length - 3} more feedback item{responses.openFeedback.length - 3 !== 1 ? 's' : ''}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {Object.keys(pollResults).length === 0 && 
+                   Object.keys(responses.vehicleRequirements).length === 0 && 
+                   Object.keys(responses.concerns).length === 0 && 
+                   responses.openFeedback.length === 0 && (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 mb-2">
+                        <BarChart3 size={48} className="mx-auto" />
+                      </div>
+                      <p className="text-gray-500">No response data available yet</p>
+                      <p className="text-sm text-gray-400">Data will appear here as participants complete the survey</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          };
+
+          return (
+            <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-800 mb-2">Fleet Transition Driver Consultation</h1>
+                <p className="text-gray-600">Interactive feedback collection for Toyota Prius replacement decision</p>
+              </div>
+
+              <div className="flex flex-wrap gap-2 mb-6">
+                <TabButton id="overview" label="Overview" icon={BarChart3} active={activeTab === 'overview'} />
+                <TabButton id="ev-survey" label="EV Survey" icon={Users} active={activeTab === 'ev-survey'} />
+                <TabButton id="vehicle-requirements" label="Vehicle Requirements" icon={Car} active={activeTab === 'vehicle-requirements'} />
+                <TabButton id="concerns" label="Concerns" icon={AlertTriangle} active={activeTab === 'concerns'} />
+                <TabButton id="feedback" label="Feedback" icon={MessageSquare} active={activeTab === 'feedback'} />
+                <TabButton id="summary" label="Summary" icon={CheckCircle} active={activeTab === 'summary'} />
+              </div>
+
+              <div className="min-h-[500px]">
+                {activeTab === 'overview' && <OverviewTab />}
+                {activeTab === 'ev-survey' && <PollingTab />}
+                {activeTab === 'vehicle-requirements' && <VehicleRequirementsTab />}
+                {activeTab === 'concerns' && <ConcernsTab />}
+                {activeTab === 'feedback' && <FeedbackTab />}
+                {activeTab === 'summary' && <SummaryTab />}
+              </div>
+            </div>
+          );
+        };
+
+        ReactDOM.render(<DriverFeedbackTool />, document.getElementById('root'));
+    </script>
+</body>
+</html>
